@@ -42,7 +42,6 @@ const setupServer = () => {
       return res.status(400).json({
         status: 404,
         message: 'ID is not valid',
-        data: [],
       });
     }
 
@@ -52,7 +51,6 @@ const setupServer = () => {
       return res.status(404).json({
         status: 404,
         message: `Contact with id ${contactId} not found`,
-        data: [],
       });
     }
 
