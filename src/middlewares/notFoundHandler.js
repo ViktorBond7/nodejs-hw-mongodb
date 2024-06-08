@@ -1,4 +1,4 @@
-const notFoundtMiddleware = (reg, res, next) => {
+const notFoundHandler = (reg, res, next) => {
   res.status(404).json({
     status: 404,
     message: 'Route not found',
@@ -6,4 +6,4 @@ const notFoundtMiddleware = (reg, res, next) => {
   });
 };
 
-export default notFoundtMiddleware;
+export default notFoundHandler;

@@ -1,8 +1,8 @@
 import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
-import errorHandler from './middlewares/errorMiddleware.js';
-import notFoundtMiddleware from './middlewares/notFoundMiddleware.js';
+import errorHandler from './middlewares/errorHandler.js';
+import notFoundHandler from './middlewares/notFoundHandler.js';
 import { env } from './utils/env.js';
 import contactsRouter from './routers/contacts.js';
 // import mongoose from 'mongoose';
@@ -23,7 +23,7 @@ const setupServer = () => {
   );
 
   app.use(contactsRouter);
-  app.use(notFoundtMiddleware);
+  app.use(notFoundHandler);
   app.use(errorHandler);
 
   app.listen(PORT, () => {
