@@ -1,11 +1,11 @@
 import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
-import errorMiddlware from './middlewares/errorMiddleware.js';
+import errorHandler from './middlewares/errorMiddleware.js';
 import notFoundtMiddleware from './middlewares/notFoundMiddleware.js';
 import { env } from './utils/env.js';
-import { getAllContacts, getContact } from './services/contacts.js';
-import mongoose from 'mongoose';
+import contactsRouter from './routers/contacts.js';
+// import mongoose from 'mongoose';
 // import { ENV_VARS } from './contacts/index.js';
 
 const PORT = Number(env('PORT', '3000'));
@@ -22,47 +22,9 @@ const setupServer = () => {
     }),
   );
 
-  app.get('/contacts', async (req, res, next) => {
-    try {
-      const contacts = await getAllContacts();
-      res.status(200).json({
-        status: 200,
-        message: 'Successfully found contacts!',
-        data: contacts,
-      });
-    } catch (error) {
-      next(error);
-    }
-  });
-
-  app.get('/contacts/:contactId', async (req, res) => {
-    const { contactId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(contactId)) {
-      return res.status(400).json({
-        status: 404,
-        message: 'ID is not valid',
-      });
-    }
-
-    const contact = await getContact(contactId);
-
-    if (!contact) {
-      return res.status(404).json({
-        status: 404,
-        message: `Contact with id ${contactId} not found`,
-      });
-    }
-
-    res.status(200).json({
-      status: 200,
-      message: `Successfully found contact with id ${contactId}!`,
-      data: contact,
-    });
-  });
-
+  app.use(contactsRouter);
   app.use(notFoundtMiddleware);
-  app.use(errorMiddlware);
+  app.use(errorHandler);
 
   app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`);

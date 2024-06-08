@@ -1,5 +1,28 @@
-const errorMiddlware = (err, req, res, next) => {
-  res.status(500).json({ error: err.message });
+import { HttpError } from 'http-errors';
+import { MongooseError } from 'mongoose';
+const errorHandler = (err, req, res, next) => {
+  if (err instanceof HttpError) {
+    res.status(err.status).json({
+      status: err.status,
+      massage: err.message,
+      data: err,
+    });
+    return;
+  }
+
+  if (err instanceof MongooseError) {
+    res.status(500).json({
+      status: err.message,
+      message: 'Mongoose error',
+    });
+    return;
+  }
+
+  res.status(500).json({
+    status: 500,
+    message: 'Something went wrong',
+    error: err.message,
+  });
 };
 
-export default errorMiddlware;
+export default errorHandler;
