@@ -8,21 +8,41 @@ export const getAllContacts = async ({
   perPage = 10,
   sortOrder = SORT_ORDER.ASC,
   sortBy = '_id',
+  filter = {},
 }) => {
   const limit = perPage;
   const skip = (page - 1) * perPage;
 
   const contactsQuery = ContactColection.find();
-  const contactsCount = await ContactColection.find()
-    .merge(contactsQuery)
-    .countDocuments();
 
-  const contacts = await contactsQuery
-    .skip(skip)
-    .limit(limit)
-    .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
-    // .sort({ [sortBy]: sortOrder })
-    .exec();
+  if (filter.contactType) {
+    contactsQuery.where('contactType').equals(filter.contactType);
+  }
+
+  if (filter.isFavourite !== null) {
+    contactsQuery.where('isFavourite').equals(filter.isFavourite);
+  }
+
+  // const contactsCount = await ContactColection.find()
+  //   .merge(contactsQuery)
+  //   .countDocuments();
+
+  // const contacts = await contactsQuery
+  //   .skip(skip)
+  //   .limit(limit)
+  //   // .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
+  //   .sort({ [sortBy]: sortOrder })
+  //   .exec();
+
+  const [contactsCount, contacts] = await Promise.all([
+    ContactColection.find().merge(contactsQuery).countDocuments(),
+    contactsQuery
+      .skip(skip)
+      .limit(limit)
+      // .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
+      .sort({ [sortBy]: sortOrder })
+      .exec(),
+  ]);
 
   const paginationData = calculatePaginationData(contactsCount, perPage, page);
 
