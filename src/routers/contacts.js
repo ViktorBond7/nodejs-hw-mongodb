@@ -8,9 +8,13 @@ import {
 } from '../controllers/contacts.js';
 import ctrlWrapper from '../utils/ctrlWrapper.js';
 import { validateBody } from '../middlewares/validateBody.js';
-import { createContactSchema } from '../validation/contacts.js';
+import { createContactSchema } from '../validation/createContacts.js';
+import { validateMongoId } from '../middlewares/valideteMongoId.js';
+import { updateContactSchema } from '../validation/updateContacts.js';
 
 const router = Router();
+
+router.use('/contacts/:contactId', validateMongoId('contactId'));
 
 router.get('/contacts', ctrlWrapper(getAllContactsController));
 
@@ -26,7 +30,7 @@ router.delete('/contacts/:contactId', ctrlWrapper(deleteContactController));
 
 router.patch(
   '/contacts/:contactId',
-  validateBody(createContactSchema),
+  validateBody(updateContactSchema),
   ctrlWrapper(patchContactController),
 );
 
