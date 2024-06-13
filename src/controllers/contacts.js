@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import {
   createContact,
   deleteContact,
@@ -35,11 +34,6 @@ export const getAllContactsController = async (req, res) => {
 
 export const getContactController = async (req, res, next) => {
   const { contactId } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(contactId)) {
-    next(createHttpError(404, 'ID is not valid'));
-    return;
-  }
 
   const contact = await getContact(contactId);
 
