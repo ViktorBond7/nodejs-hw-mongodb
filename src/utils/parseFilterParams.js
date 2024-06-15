@@ -7,18 +7,6 @@ const parseContactType = (contactType) => {
   if (isContactType(contactType)) return contactType;
 };
 
-// const parseNumber = (number) => {
-//   const isString = typeof number === 'string';
-//   if (!isString) return;
-
-//   const parsedNumber = parseInt(number);
-//   if (Number.isNaN(parsedNumber)) {
-//     return;
-//   }
-
-//   return parsedNumber;
-// };
-
 const parseBoolean = (value) => {
   if (typeof value === 'string') {
     if (value.toLowerCase() === 'true') return true;
@@ -38,3 +26,15 @@ export const parseFilterParams = (query) => {
     isFavourite: parsedisFavourite,
   };
 };
+
+// const parseNumber = (number) => {
+//   const isString = typeof number === 'string';
+//   if (!isString) return;
+
+//   const parsedNumber = parseInt(number);
+//   if (Number.isNaN(parsedNumber)) {
+//     return;
+//   }
+
+//   return parsedNumber;
+// };
