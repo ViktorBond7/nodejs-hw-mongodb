@@ -7,7 +7,7 @@ export const getAllContacts = async ({
   page = 1,
   perPage = 10,
   sortOrder = SORT_ORDER.ASC,
-  sortBy = '_id',
+  sortBy = 'name',
   filter = {},
 }) => {
   const limit = perPage;
@@ -23,23 +23,11 @@ export const getAllContacts = async ({
     contactsQuery.where('isFavourite').equals(filter.isFavourite);
   }
 
-  // const contactsCount = await ContactColection.find()
-  //   .merge(contactsQuery)
-  //   .countDocuments();
-
-  // const contacts = await contactsQuery
-  //   .skip(skip)
-  //   .limit(limit)
-  //   // .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
-  //   .sort({ [sortBy]: sortOrder })
-  //   .exec();
-
   const [contactsCount, contacts] = await Promise.all([
     ContactColection.find().merge(contactsQuery).countDocuments(),
     contactsQuery
       .skip(skip)
       .limit(limit)
-      // .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
       .sort({ [sortBy]: sortOrder })
       .exec(),
   ]);
@@ -83,3 +71,14 @@ export const patchContact = async (contactId, payload) => {
   }
   return contact;
 };
+
+// const contactsCount = await ContactColection.find()
+//   .merge(contactsQuery)
+//   .countDocuments();
+
+// const contacts = await contactsQuery
+//   .skip(skip)
+//   .limit(limit)
+//   // .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
+//   .sort({ [sortBy]: sortOrder })
+//   .exec();
