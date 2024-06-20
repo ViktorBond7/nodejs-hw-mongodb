@@ -4,7 +4,8 @@ import cors from 'cors';
 import errorHandler from './middlewares/errorHandler.js';
 import notFoundHandler from './middlewares/notFoundHandler.js';
 import { env } from './utils/env.js';
-import contactsRouter from './routers/contacts.js';
+import rootRouter from './routers/index.js';
+
 // import mongoose from 'mongoose';
 // import { ENV_VARS } from './contacts/index.js';
 
@@ -22,8 +23,10 @@ const setupServer = () => {
     }),
   );
 
-  app.use(contactsRouter);
+  app.use(rootRouter);
+
   app.use(notFoundHandler);
+
   app.use(errorHandler);
 
   app.listen(PORT, () => {
