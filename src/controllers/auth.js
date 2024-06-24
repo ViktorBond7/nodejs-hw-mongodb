@@ -1,21 +1,76 @@
-import { loginUser, registerUser } from '../services/auth.js';
+import { REFRESH_TOKEN_VALID_UNTIL } from '../contacts/index.js';
+import {
+  loginUser,
+  logoutUser,
+  refreshUsersSession,
+  registerUser,
+} from '../services/auth.js';
 
 export const registerUserController = async (req, res) => {
   const user = await registerUser(req.body);
 
-  res.json({
-    status: 201,
+  res.status(201).json({
     message: 'Successfully registered a user!',
-    data: user,
+    data: { name: user.name, email: user.email },
   });
 };
 
 export const loginUserController = async (req, res) => {
-  await loginUser(req.body);
+  const session = await loginUser(req.body);
+
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: new Date(REFRESH_TOKEN_VALID_UNTIL),
+  });
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: new Date(REFRESH_TOKEN_VALID_UNTIL),
+  });
+
+  res.status(200).json({
+    status: 200,
+    message: 'Successfully logged in an user!',
+    data: {
+      accessToken: session.accessToken,
+    },
+  });
 };
 
-// export const loginUserController = async (req, res) => {
-//   await loginUser(req.body);
+export const logoutUserController = async (req, res) => {
+  if (req.cookies.sessionId) {
+    await logoutUser(req.cookies.sessionId);
+  }
 
-//   // далі ми доповнемо цей контролер
-// };
+  res.clearCookie('sessionId');
+  res.clearCookie('refreshToken');
+
+  res.status(204).send();
+};
+
+const setupSession = (res, session) => {
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: new Date(Date.now() + REFRESH_TOKEN_VALID_UNTIL),
+  });
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: new Date(Date.now() + REFRESH_TOKEN_VALID_UNTIL),
+  });
+};
+
+export const refreshUserSessionController = async (req, res) => {
+  const session = await refreshUsersSession({
+    sessionId: req.cookies.sessionId,
+    refreshToken: req.cookies.refreshToken,
+  });
+
+  setupSession(res, session);
+
+  res.status(200).json({
+    status: 200,
+    message: 'Successfully refreshed a session!',
+    data: {
+      accessToken: session.accessToken,
+    },
+  });
+};

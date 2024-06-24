@@ -1,6 +1,12 @@
 import createHttpError from 'http-errors';
 import { UsersCollection } from '../db/models/user.js';
 import bcrypt from 'bcrypt';
+import { SessionsCollection } from '../db/models/session.js';
+import { randomBytes } from 'crypto';
+import {
+  ACCESS_TOKEN_VALID_UNTIL,
+  REFRESH_TOKEN_VALID_UNTIL,
+} from '../contacts/index.js';
 
 export const registerUser = async (payload) => {
   const user = await UsersCollection.findOne({ email: payload.email });
@@ -16,24 +22,73 @@ export const registerUser = async (payload) => {
 
 export const loginUser = async (payload) => {
   const user = await UsersCollection.findOne({ email: payload.email });
-  if (user) throw createHttpError(401, 'User not found');
-  const isEqual = await bcrypt.compare(payload.password, user.password);
+  if (!user) throw createHttpError(401, 'User not found');
 
-  if (isEqual) {
-    throw createHttpError(401, 'Unauthorized');
+  const isEqual = await bcrypt.compare(payload.password, user.password);
+  if (!isEqual) {
+    throw createHttpError(401, 'User not found');
   }
+
+  await SessionsCollection.deleteOne({ userId: user._id });
+
+  const accessToken = randomBytes(30).toString('base64');
+  const refreshToken = randomBytes(30).toString('base64');
+
+  return await SessionsCollection.create({
+    userId: user._id,
+    accessToken,
+    refreshToken,
+    accessTokenValidUntil: new Date(Date.now() + ACCESS_TOKEN_VALID_UNTIL),
+    refreshTokenValidUntil: new Date(Date.now() + REFRESH_TOKEN_VALID_UNTIL),
+  });
 };
 
-// export const loginUser = async (payload) => {
-//   const user = await UsersCollection.findOne({ email: payload.email });
-//   if (!user) {
-//     throw createHttpError(404, 'User not found');
-//   }
-//   const isEqual = await bcrypt.compare(payload.password, user.password); // Порівнюємо хеші паролів
+export const logoutUser = async (sessionId) => {
+  await SessionsCollection.deleteOne({ _id: sessionId });
+};
 
-//   if (!isEqual) {
-//     throw createHttpError(401, 'Unauthorized');
-//   }
+const createSession = () => {
+  const accessToken = randomBytes(30).toString('base64');
+  const refreshToken = randomBytes(30).toString('base64');
 
-//   // далі ми доповнемо цей контролер
-// };
+  return {
+    accessToken,
+    refreshToken,
+    accessTokenValidUntil: new Date(Date.now() + ACCESS_TOKEN_VALID_UNTIL),
+    refreshTokenValidUntil: new Date(Date.now() + REFRESH_TOKEN_VALID_UNTIL),
+  };
+};
+
+export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
+  const session = await SessionsCollection.findOne({
+    _id: sessionId,
+    refreshToken,
+  });
+
+  console.log(session);
+
+  if (!session) {
+    throw createHttpError(401, 'Session not fount');
+  }
+
+  // const user = await UsersCollection.findById(session.userId);
+  // if (user) {
+  //   throw createHttpError(401, 'Session not fount');
+  // }
+
+  const isSessionTokenExpired =
+    new Date() > new Date(session.refreshTokenValidUntil);
+
+  if (isSessionTokenExpired) {
+    throw createHttpError(401, 'Session token expired');
+  }
+
+  const newSession = createSession();
+
+  await SessionsCollection.deleteOne({ _id: sessionId, refreshToken });
+
+  return await SessionsCollection.create({
+    userId: session.userId,
+    ...newSession,
+  });
+};
