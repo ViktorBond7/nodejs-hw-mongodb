@@ -4,6 +4,8 @@ import { loginUserSchema, registerUserSchema } from '../validation/auth.js';
 import ctrlWrapper from '../utils/ctrlWrapper.js';
 import {
   loginUserController,
+  logoutUserController,
+  refreshUserSessionController,
   registerUserController,
 } from '../controllers/auth.js';
 
@@ -20,20 +22,8 @@ autchRouter.post(
   ctrlWrapper(loginUserController),
 );
 
+autchRouter.post('/refresh', ctrlWrapper(refreshUserSessionController));
+
+autchRouter.post('/logout', ctrlWrapper(logoutUserController));
+
 export default autchRouter;
-
-// import { Router } from 'express';
-// import { ctrlWrapper } from '../utils/ctrlWrapper.js';
-// import { registerUserSchema } from '../validation/auth.js';
-// import { registerUserController } from '../controllers/auth.js';
-// import { validateBody } from '../middlewares/validateBody.js';
-
-// const router = Router();
-
-// router.post(
-//   '/register',
-//   validateBody(registerUserSchema),
-//   ctrlWrapper(registerUserController),
-// );
-
-// export default router;
