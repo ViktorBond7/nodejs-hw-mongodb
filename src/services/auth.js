@@ -65,14 +65,12 @@ export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
     refreshToken,
   });
 
-  console.log(session);
-
   if (!session) {
     throw createHttpError(401, 'Session not fount');
   }
 
   // const user = await UsersCollection.findById(session.userId);
-  // if (user) {
+  // if (!user) {
   //   throw createHttpError(401, 'Session not fount');
   // }
 
@@ -85,7 +83,10 @@ export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
 
   const newSession = createSession();
 
-  await SessionsCollection.deleteOne({ _id: sessionId, refreshToken });
+  await SessionsCollection.deleteOne({
+    _id: sessionId,
+    refreshToken,
+  });
 
   return await SessionsCollection.create({
     userId: session.userId,
