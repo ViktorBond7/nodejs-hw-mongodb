@@ -35,7 +35,7 @@ contactsRouter.get(
 
 contactsRouter.post(
   '/',
-  checkRoles(ROLES.TEACHER),
+  checkRoles(ROLES.TEACHER, ROLES.PARENT),
   validateBody(createContactSchema),
   ctrlWrapper(createContactController),
 );
