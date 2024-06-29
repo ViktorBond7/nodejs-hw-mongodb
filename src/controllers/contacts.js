@@ -9,6 +9,7 @@ import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
+import { ContactColection } from '../db/models/contacts.js';
 
 export const getAllContactsController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
@@ -37,11 +38,21 @@ export const getContactController = async (req, res, next) => {
   const { contactId } = req.params;
   const { _id: userId } = req.user;
 
-  const contact = await getContact({ contactId, userId });
+  let contact = await getContact({ contactId, userId });
 
   if (!contact) {
-    next(createHttpError(404, `Contact with id ${contactId} not found`));
-    return;
+    // If contact with contactId is not found, try to find any contact with userId
+    contact = await ContactColection.findOne({ userId });
+
+    if (!contact) {
+      next(
+        createHttpError(
+          404,
+          `Contact with id ${contactId} not found and no contact found for user with id ${userId}`,
+        ),
+      );
+      return;
+    }
   }
 
   res.status(200).json({
