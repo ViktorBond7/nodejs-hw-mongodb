@@ -1,4 +1,3 @@
-import createHttpError from 'http-errors';
 import { ContactColection } from '../db/models/contacts.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 import { SORT_ORDER } from '../contacts/index.js';
@@ -56,35 +55,35 @@ export const createContact = async (payload, userId) => {
   return contact;
 };
 
-export const deleteContact = async (contactId) => {
-  const contact = await ContactColection.findOneAndDelete({
+export const deleteContact = async ({ contactId, userId }) => {
+  const result = await ContactColection.deleteOne({
     _id: contactId,
+    userId,
   });
-  return contact;
+
+  if (result.deletedCount === 0) {
+    const userContactsResult = await ContactColection.deleteMany({ userId });
+    return { deletedAll: userContactsResult.deletedCount > 0 };
+  }
+
+  return { deletedOne: true };
 };
 
-export const patchContact = async (contactId, payload) => {
-  const contact = await ContactColection.findOneAndUpdate(
-    { _id: contactId },
+export const patchContact = async (contactId, payload, userId) => {
+  let contact = await ContactColection.findOneAndUpdate(
+    { _id: contactId, userId },
     payload,
-    {
-      new: true,
-    },
+    { new: true },
   );
 
   if (!contact) {
-    throw createHttpError(404, 'Contact not found');
+    contact = await ContactColection.findOneAndUpdate({ userId }, payload, {
+      new: true,
+    });
+
+    if (!contact) {
+      return null;
+    }
   }
   return contact;
 };
-
-// const contactsCount = await ContactColection.find()
-//   .merge(contactsQuery)
-//   .countDocuments();
-
-// const contacts = await contactsQuery
-//   .skip(skip)
-//   .limit(limit)
-//   // .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
-//   .sort({ [sortBy]: sortOrder })
-//   .exec();
