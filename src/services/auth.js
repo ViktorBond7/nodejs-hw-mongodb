@@ -5,8 +5,13 @@ import { SessionsCollection } from '../db/models/session.js';
 import { randomBytes } from 'crypto';
 import {
   ACCESS_TOKEN_VALID_UNTIL,
+  ENV_VARS,
   REFRESH_TOKEN_VALID_UNTIL,
+  SMTP,
 } from '../contacts/index.js';
+import jwt from 'jsonwebtoken';
+import { env } from '../utils/env.js';
+import { sendEmail } from '../utils/sendMail.js';
 
 export const registerUser = async (payload) => {
   const user = await UsersCollection.findOne({ email: payload.email });
@@ -93,4 +98,28 @@ export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
     ...newSession,
   });
 };
-//////
+
+export const requestResetToken = async (email) => {
+  const user = await UsersCollection.findOne({ email });
+  if (!user) {
+    throw createHttpError(404, 'user not found');
+  }
+
+  const resetToken = jwt.sign(
+    {
+      sub: user._id,
+      email,
+    },
+    env(ENV_VARS.JWT_SECRET),
+    {
+      expiresIn: '5m',
+    },
+  );
+
+  await sendEmail({
+    from: env(SMTP.SMTP_USER),
+    to: email,
+    subject: 'Reset your password',
+    html: `<p>Click <a href="${resetToken}">here</a> to reset your password!</p>`,
+  });
+};
