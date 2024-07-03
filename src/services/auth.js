@@ -152,47 +152,36 @@ export const requestResetToken = async (email) => {
   }
 };
 
-// export const resetPassword = async (payload) => {
-//   let entries;
+export const resetPassword = async (payload) => {
+  let entries;
 
-//   try {
-//     entries = jwt.verify(payload.token, env(ENV_VARS.JWT_SECRET));
-//   } catch (error) {
-//     if (
-//       error.name === 'TokenExpiredError' ||
-//       error.name === 'JsonWebTokenError'
-//     ) {
-//       throw createHttpError(401, 'Token is expired or invalid');
-//     }
-//     throw createHttpError(401, error.message);
-//   }
+  try {
+    entries = jwt.verify(payload.token, env(ENV_VARS.JWT_SECRET));
+  } catch (error) {
+    if (
+      error.name === 'TokenExpiredError' ||
+      error.name === 'JsonWebTokenError'
+    ) {
+      throw createHttpError(401, 'Token is expired or invalid');
+    }
+    throw createHttpError(401, error.message);
+  }
 
-//   const user = await
+  const user = await UsersCollection.findOne({
+    email: entries.email,
+    _id: entries.sub,
+  });
 
-// };
-// export const resetPassword = async (payload) => {
-//   let entries;
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
 
-//   try {
-//     entries = jwt.verify(payload.token, env('JWT_SECRET'));
-//   } catch (err) {
-//     if (err instanceof Error) throw createHttpError(401, err.message);
-//     throw err;
-//   }
+  const encryptedPassword = await bcrypt.hash(payload.password, 10);
 
-//   const user = await UsersCollection.findOne({
-//     email: entries.email,
-//     _id: entries.sub,
-//   });
+  await UsersCollection.updateOne(
+    { _id: user._id },
+    { password: encryptedPassword },
+  );
 
-//   if (!user) {
-//     throw createHttpError(404, 'User not found');
-//   }
-
-//   const encryptedPassword = await bcrypt.hash(payload.password, 10);
-
-//   await UsersCollection.updateOne(
-//     { _id: user._id },
-//     { password: encryptedPassword },
-//   );
-// };
+  await SessionsCollection.deleteMany({ userId: user._id });
+};
