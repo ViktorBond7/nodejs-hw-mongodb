@@ -12,6 +12,7 @@ import { createContactSchema } from '../validation/createContacts.js';
 import { validateMongoId } from '../middlewares/valideteMongoId.js';
 import { updateContactSchema } from '../validation/updateContacts.js';
 import { authenticate } from '../middlewares/authenticate.js';
+import { upload } from '../middlewares/multer.js';
 // import { checkRoles } from '../middlewares/checkRoles.js';
 // import { ROLES } from '../contacts/index.js';
 
@@ -27,6 +28,7 @@ contactsRouter.get('/:contactId', ctrlWrapper(getContactController));
 
 contactsRouter.post(
   '/',
+  upload.single('photo'),
   validateBody(createContactSchema),
   ctrlWrapper(createContactController),
 );
@@ -35,6 +37,7 @@ contactsRouter.delete('/:contactId', ctrlWrapper(deleteContactController));
 
 contactsRouter.patch(
   '/:contactId',
+  upload.single('photo'),
   validateBody(updateContactSchema),
   ctrlWrapper(patchContactController),
 );
