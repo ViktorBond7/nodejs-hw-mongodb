@@ -1,0 +1,24 @@
+description: Not Found
+content:
+  application/json:
+    schema:
+      type: object
+      required:
+        - status
+        - message
+        - data
+      properties:
+        status:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: Contact with id 6682dfeb5f7bde0e544ac430 not found and no contact found for user with id 6682dfeb5f7bde0e544ac430
+        data:
+          type: object
+          required:
+            - message
+          properties:
+            message:
+              type: string
+              example: 'Contact with id 6682dfeb5f7bde0e544ac430 not found and no contact found for user with id 6682dfeb5f7bde0e544ac430'
