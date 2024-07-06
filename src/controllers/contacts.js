@@ -10,7 +10,6 @@ import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
 import { ContactColection } from '../db/models/contacts.js';
-import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 
 export const getAllContactsController = async (req, res) => {
@@ -41,7 +40,7 @@ export const getContactController = async (req, res, next) => {
   const { _id: userId } = req.user;
 
   let contact = await getContact({ contactId, userId });
-
+  let message;
   if (!contact) {
     // If contact with contactId is not found, try to find any contact with userId
     contact = await ContactColection.findOne({ userId });
@@ -55,11 +54,14 @@ export const getContactController = async (req, res, next) => {
       );
       return;
     }
+    message = `Successfully found contact for user with id ${userId} instead of contact id ${contactId}`;
+  } else {
+    message = `Successfully found contact with id ${contactId}!`;
   }
 
   res.status(200).json({
     status: 200,
-    message: `Successfully found contact with id ${contactId}!`,
+    message,
     data: contact,
   });
 };
@@ -91,7 +93,12 @@ export const deleteContactController = async (req, res, next) => {
   }
 
   if (!contact.deletedOne) {
-    next(createHttpError(404, 'Contact not found'));
+    next(
+      createHttpError(
+        404,
+        `Contact with id ${contactId} not found and no contact found for user with id ${userId}`,
+      ),
+    );
     return;
   }
   res.status(204).send();
