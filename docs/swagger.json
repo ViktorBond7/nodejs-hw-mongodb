@@ -14,7 +14,7 @@
       "url": "http://localhost:3000"
     },
     {
-      "url": "<http://localhost:3000/example.com/api/v1>"
+      "url": "https://nodejs-hw-swagger.onrender.com/api-docs"
     }
   ],
   "tags": [
