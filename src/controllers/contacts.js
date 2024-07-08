@@ -93,12 +93,7 @@ export const deleteContactController = async (req, res, next) => {
   }
 
   if (!contact.deletedOne) {
-    next(
-      createHttpError(
-        404,
-        `Contact with id ${contactId} not found and no contact found for user with id ${userId}`,
-      ),
-    );
+    next(createHttpError(404, 'Contact not found'));
     return;
   }
   res.status(204).send();
@@ -115,7 +110,7 @@ export const patchContactController = async (req, res, next) => {
     photoUrl = await saveFileToCloudinary(photo);
   }
 
-  const result = await patchContact(
+  let result = await patchContact(
     contactId,
     {
       ...req.body,
@@ -124,6 +119,20 @@ export const patchContactController = async (req, res, next) => {
     userId,
   );
 
+  let updatedBy = 'contactId';
+
+  if (!result) {
+    result = await patchContact(
+      null,
+      {
+        ...req.body,
+        photo: photoUrl,
+      },
+      userId,
+    );
+    updatedBy = 'userId';
+  }
+
   if (!result) {
     next(createHttpError(404, 'Contact not found'));
     return;
@@ -131,7 +140,9 @@ export const patchContactController = async (req, res, next) => {
 
   res.json({
     status: 200,
-    message: 'Successfully patched a contact!',
+    message: `Successfully patched a contact by ${
+      updatedBy === 'contactId' ? `contactId ${contactId}` : `userId ${userId}`
+    }!`,
     data: result,
   });
 };
