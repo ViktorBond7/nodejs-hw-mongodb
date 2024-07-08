@@ -122,6 +122,114 @@
             "$ref": "#/components/responses/404"
           }
         }
+      },
+      "patch": {
+        "tags": [
+          "Contacts"
+        ],
+        "summary": "Update contact",
+        "operationId": "updateContact",
+        "description": "Update a contact by ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Contact's id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "description": "Contact's name",
+                    "type": "string",
+                    "example": "John Doe"
+                  },
+                  "phoneNumber": {
+                    "description": "Contact's phone number",
+                    "type": "string",
+                    "example": "+1234567890"
+                  },
+                  "email": {
+                    "description": "Contact's email",
+                    "type": "string",
+                    "format": "email",
+                    "example": "john.doe@example.com"
+                  },
+                  "isFavourite": {
+                    "description": "Whether the contact is a favourite",
+                    "type": "boolean",
+                    "example": false
+                  },
+                  "contactType": {
+                    "description": "Contact's type",
+                    "type": "string",
+                    "enum": [
+                      "work",
+                      "home",
+                      "personal"
+                    ],
+                    "example": "personal"
+                  },
+                  "photo": {
+                    "description": "Contact's photo",
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updates a contact",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Successfully patched a contact by contactId 6684f6a51cee5e4c50b1a7f9!"
+                    },
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/contact"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        }
       }
     },
     "/contacts": {
@@ -291,9 +399,7 @@
                 "type": "object",
                 "required": [
                   "name",
-                  "phoneNumber",
-                  "contactType",
-                  "userId"
+                  "phoneNumber"
                 ],
                 "properties": {
                   "name": {
@@ -326,11 +432,6 @@
                       "personal"
                     ],
                     "example": "personal"
-                  },
-                  "userId": {
-                    "description": "Contact's user id",
-                    "type": "string",
-                    "example": "65e4decdd286b30065d54af9"
                   },
                   "photo": {
                     "description": "Contact's photo",
@@ -500,7 +601,7 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "Contact with id 6682dfeb5f7bde0e544ac430 not found and no contact found for user with id 6682dfeb5f7bde0e544ac430"
+                  "example": "Contact not found"
                 },
                 "data": {
                   "type": "object",
@@ -510,7 +611,7 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "Contact with id 6682dfeb5f7bde0e544ac430 not found and no contact found for user with id 6682dfeb5f7bde0e544ac430"
+                      "example": "Contact not found"
                     }
                   }
                 }

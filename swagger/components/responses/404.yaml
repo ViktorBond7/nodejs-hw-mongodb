@@ -13,7 +13,7 @@ content:
           example: 404
         message:
           type: string
-          example: Contact with id 6682dfeb5f7bde0e544ac430 not found and no contact found for user with id 6682dfeb5f7bde0e544ac430
+          example: 'Contact not found'
         data:
           type: object
           required:
@@ -21,4 +21,4 @@ content:
           properties:
             message:
               type: string
-              example: 'Contact with id 6682dfeb5f7bde0e544ac430 not found and no contact found for user with id 6682dfeb5f7bde0e544ac430'
+              example: 'Contact not found'

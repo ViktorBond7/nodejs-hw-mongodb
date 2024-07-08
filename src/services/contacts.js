@@ -77,21 +77,16 @@ export const deleteContact = async ({ contactId, userId }) => {
   return { deletedOne: true };
 };
 
-export const patchContact = async (contactId, payload, userId) => {
-  let contact = await ContactColection.findOneAndUpdate(
-    { _id: contactId, userId },
-    payload,
-    { new: true },
-  );
-
-  if (!contact) {
-    contact = await ContactColection.findOneAndUpdate({ userId }, payload, {
+export const patchContact = async (contactId, updateData, userId) => {
+  if (contactId) {
+    return await ContactColection.findOneAndUpdate(
+      { _id: contactId, userId },
+      updateData,
+      { new: true },
+    );
+  } else {
+    return await ContactColection.findOneAndUpdate({ userId }, updateData, {
       new: true,
     });
-
-    if (!contact) {
-      return null;
-    }
   }
-  return contact;
 };
