@@ -52,7 +52,6 @@ export const getContact = async ({ contactId, userId }) => {
 };
 
 export const createContact = async ({ photo, ...payload }, userId) => {
-  // const url = await saveFileToUploadDir(photo);
   const url = await saveFileToCloudinary(photo);
 
   const contact = await ContactColection.create({
