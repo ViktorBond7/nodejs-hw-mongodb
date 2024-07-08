@@ -89,3 +89,9 @@ export const patchContact = async (contactId, updateData, userId) => {
     });
   }
 };
+
+// export const deleteContact = async ({ contactId, userId }) => {
+//   const result = await ContactColection.deleteOne({
+//     _id: contactId,
+//     userId,
+//   });
